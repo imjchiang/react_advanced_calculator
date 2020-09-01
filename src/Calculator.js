@@ -15,10 +15,33 @@ const Calculator = props => {
         {
             alert("ERROR: CANNOT START EXPRESSION WITH OPERATOR");
         }
+        else if (display[display.length - 1] !== " " && oper === "invert")
+        {
+            let displayArray = display.split(" ");
+            let lastValue = displayArray[displayArray.length - 1];
+            if (lastValue.substring(0, 3) === "(-)")
+            {
+                lastValue = lastValue.substring(3, lastValue.length);
+            }
+            else
+            {
+                lastValue = "(-)" + lastValue;
+            }
+            displayArray.pop();
+            displayArray.push(lastValue);
+            setDisplay(displayArray.join(" "));
+        }
+        // else if ((display[display.length - 1] === " " && oper === "-") || (display.length < 1 && oper === "-"))
+        // {
+        //     let displayWithOper = display + oper;
+        //     setDisplay(displayWithOper);
+        // }
         else if (display[display.length - 2] !== "+" && 
             display[display.length - 2] !== "-" && 
             display[display.length - 2] !== "*" && 
-            display[display.length - 2] !== "/")
+            display[display.length - 2] !== "/" &&
+            display[display.length - 2] !== "%" &&
+            display[display.length - 2] !== " ")
         {
             let displayWithOper = display + " " + oper + " ";
             setDisplay(displayWithOper);
@@ -89,6 +112,15 @@ const Calculator = props => {
 
             for (let i = 0; i < displayArray.length; i++)
             {
+                let displayString = displayArray[i];
+                if (displayString.substring(0, 3) === "(-)")
+                {
+                    displayArray[i] = "-" + displayString.substring(3, displayString.length);
+                }
+            }
+            console.log(displayArray);
+            for (let i = 0; i < displayArray.length; i++)
+            {
                 if (displayArray[i] === "*")
                 {
                     let valFrontIndex = i - 1;
@@ -119,6 +151,23 @@ const Calculator = props => {
                         valBehindIndex++;
                     }
                     let tempResult = parseFloat(displayArray[valFrontIndex]) / parseFloat(displayArray[valBehindIndex]);
+                    displayArray[valFrontIndex] = undefined;
+                    displayArray[valBehindIndex] = undefined;
+                    displayArray[i] = tempResult;
+                }
+                if (displayArray[i] === "%")
+                {
+                    let valFrontIndex = i - 1;
+                    let valBehindIndex = i + 1;
+                    while (displayArray[valFrontIndex] === undefined)
+                    {
+                        valFrontIndex--;
+                    }
+                    while (displayArray[valBehindIndex] === undefined)
+                    {
+                        valBehindIndex++;
+                    }
+                    let tempResult = parseFloat(displayArray[valFrontIndex]) % parseFloat(displayArray[valBehindIndex]);
                     displayArray[valFrontIndex] = undefined;
                     displayArray[valBehindIndex] = undefined;
                     displayArray[i] = tempResult;
@@ -184,8 +233,8 @@ const Calculator = props => {
                 <div className="answer-box">{display}</div>
                 <div className="calc-row">
                     <button className="calc-button calc-button-top" onClick={clearDisplay}>AC</button>
-                    <button className="calc-button calc-button-top">+/-</button>
-                    <button className="calc-button calc-button-top">%</button>
+                    <button className="calc-button calc-button-top" onClick={() => createOperator("invert")}>+/-</button>
+                    <button className="calc-button calc-button-top" onClick={() => createOperator("%")}>%</button>
                     <button className="calc-button calc-button-op" onClick={() => createOperator("/")}>/</button>
                 </div>
                 <div className="calc-row">
